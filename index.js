@@ -45,6 +45,14 @@ const registerBuildGulpTasks = (gulp, lambdaDir) => {
     config.functionName = lambdaName;
   }
 
+  if (typeof config.functionName === 'object') {
+    if (process.argv.includes('--production')) {
+      config.functionName = config.functionName.production
+    } else {
+      config.functionName = config.functionName.develop
+    }
+  }
+
   // check that lambda exists
   try {
     fs.existsSync(pathToLambda);
@@ -105,13 +113,13 @@ const registerBuildGulpTasks = (gulp, lambdaDir) => {
     return gulp.src(path.join(path.dirname(pathToLambda), 'package.json'))
       .pipe(gulp.dest(dist))
       .pipe(install({ production: true })
-    );
+      );
   });
 
   gulp.task('lambda:zip', ['lambda:build', 'lambda:npm'], () => {
     return gulp.src([`${dist}/**/*`, `${dist}/.*`])
-    .pipe(zip(`${lambdaName}.zip`))
-    .pipe(gulp.dest(distRootDir));
+      .pipe(zip(`${lambdaName}.zip`))
+      .pipe(gulp.dest(distRootDir));
   });
 
   gulp.task('lambda:upload', (done) => {
@@ -126,7 +134,7 @@ const registerBuildGulpTasks = (gulp, lambdaDir) => {
     runSequence(
       'lambda:clean',
       'lambda:zip',
-       done
+      done
     );
   });
 
@@ -134,7 +142,7 @@ const registerBuildGulpTasks = (gulp, lambdaDir) => {
     runSequence(
       'lambda:package',
       'lambda:upload',
-       done
+      done
     );
   });
 
